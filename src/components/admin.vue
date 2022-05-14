@@ -74,7 +74,7 @@ export default {
         },
         get_adname(){
             return localStorage.getItem('user-infor');
-        },
+        }
     },
     components: {
         FooTer,

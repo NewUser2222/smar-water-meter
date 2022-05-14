@@ -9,10 +9,10 @@
         <transition  name="fade" apear>
             <div class="sub-menu" v-if="isOpen">
                 <div class="menu-item">
-                    <router-link to="/services/web">Đăng kí gắn/thay mới ĐH</router-link>
+                    <router-link to="/service">Đăng kí gắn/thay mới ĐH</router-link>
                 </div>
                 <div class="menu-item">
-                    <router-link to="/services/design">Hướng Dẫn</router-link>
+                    <router-link to="">Hướng Dẫn</router-link>
                 </div>
             </div>
         </transition>

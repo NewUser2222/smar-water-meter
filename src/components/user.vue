@@ -6,8 +6,8 @@
     </div>
     <div class="clear"></div>
     <div class="row">
-        <div class="col">
-            <area-chart :colors="['#063970', '#76b3fb']" :data="{'2017-01-01': 2, '2017-02-01': 5}"></area-chart>
+        <div :key="reload" class="col">
+            <area-chart :colors="['#063970', '#76b3fb']" :data=this.infor  ></area-chart>
         </div>
         <div id="bill" class="col">
             <div class="card">
@@ -27,7 +27,7 @@
                             <p class="card-text">Chỉ số đầu chỉ số đầu: </p>
                         </div>
                         <div class="col md-4">
-                            <p class="card-text">50</p>
+                            <p class="card-text"> {{chisocu}} </p>
                         </div>
                     </div>
                     <div class="row">
@@ -35,7 +35,7 @@
                             <p class="card-text">Chỉ số đầu chỉ số cuối: </p>
                         </div>
                         <div class="col md-4">
-                            <p class="card-text">50</p>
+                            <p class="card-text"> {{chisomoi}} </p>
                         </div>
                     </div>
                     <div class="row ">
@@ -43,7 +43,7 @@
                             <p class="card-text">Số m3 đã sử dụng: </p>
                         </div>
                         <div class="col md-4">
-                            <p class="card-text">50</p>
+                            <p class="card-text"> {{ chisomoi - chisocu }}</p>
                         </div>
                     </div>
                                     <div class="row ">
@@ -51,7 +51,7 @@
                             <p class="card-text">Thành tiền: </p>
                         </div>
                         <div class="col md-4">
-                            <p class="card-text"> {{ totalfee | hienthi}} <span>VNĐ</span></p>
+                            <p class="card-text"> {{ hienthi }} <span>VNĐ</span></p>
                         </div>
                     </div>
                     <div id="payment">
@@ -60,6 +60,7 @@
                 <div class="card-footer text-muted">
                     @copyright
                 </div>
+                <button class="btn-primary" @click="fetch_data()">Getdata</button>
             </div>
         </div>
     </div>
@@ -78,14 +79,24 @@ export default {
         date: '',
         time: '',
         res: '',
-        totalfee: 1000000,
+        totalfee: 0,
+        chisomoi: 0,
+        chisocu: 0,
+        res: '',
+        date: '',
+        reload: 0,
+        infor: []
     }),
-    filters: {
-        hienthi: function(sotien) {
-            return (sotien.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'))
+    computed: {
+        hienthi () {
+            this.totalfee = 4500 * (this.chisomoi - this.chisocu);
+            return (this.totalfee.toFixed(1).replace(/\d(?=(\d{3})+\.)/g, '$&,'))
         }
     },
     methods: {
+        forceRerender() {
+            this.reload += 1;
+        },
         logout() 
             {
                 localStorage.clear();
@@ -107,17 +118,46 @@ export default {
         return format(new Date(strDate), "dd/MM/yyyy")
         },
         async getdata () {
-            const result = await axios.get('https://io.adafruit.com/api/v2/ManhTran/feeds/smart-water-meter/data?limit=5')
+            const result = await axios.get('https://io.adafruit.com/api/v2/ManhTran/feeds/smart-water-meter/data?limit=3')
             this.res = result.data;
-            console.log(this.res)
+            this.res.forEach(element => {
+                var tmp = JSON.parse(element.value);
+                let ndata = [];
+                ndata[0] = tmp.DATE;
+                ndata[1] = parseInt(tmp.LIT);
+                this.infor.push(ndata);
+            });
+            this.forceRerender();
+            this.update_data();
+            console.log(this.infor);
+        },
+        update_data: function(){
+            let n_data = '';
+            let size = this.infor.length - 1;
+            let m3 = (this.infor[size]);
+            this.chisocu = m3[1];
+            m3 = this.infor[0];
+            this.chisomoi = m3[1];
+            let tmp = this.res[0].value;
+            if(this.infor.length > 30) this.infor = [];
+        },
+        fetch_data: function(){
+            axios.post('http://localhost/php/index.php',{
+                action: 'fetchdata',
+            }).then(function(response){
+                console.log(response.data);
+            }).catch(function (error){
+                console.log(error);
+            });
         }
     },
+
     components: {
         FooTer,
         HeaderComponent,
     },
     mounted () {
-        this.getdata()
+        this.getdata();
     }
 }
 </script>

@@ -22,7 +22,6 @@
         </div>
         <div id="nd-pay">
           <p id="nd-name">Thanh toán <br> <span> trực tuyến</span></p>
-
         </div>
         <div class="clear"></div>
       </div>

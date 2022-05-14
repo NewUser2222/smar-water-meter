@@ -21,7 +21,7 @@
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                     <li class="nav-item">
                         <a href="#" class="nav-link align-middle px-0">
-                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline"><strong>Tổng quan</strong></span>
+                            <router-link to="/admin" class="nav-link px-2"><span class="d-none d-sm-inline"><strong>Tổng quan</strong></span></router-link>
                         </a>
                     </li>
                     <li>
@@ -44,9 +44,28 @@
             </div>
         </div>
         <div class="col py-3">
-            <div id="overview">
-                Tracuu
+            <div id="search" class="input-group">
+                <input id="tukhoa" v-model="tukhoa" type="text" class="form-control" placeholder="Nhập từ khóa..." aria-label="Username" aria-describedby="input-group-button-right">
+                <button @click="find()" type="button" class="btn btn-outline-primary" id="input-group-button-right">Tìm kiếm</button>
             </div>
+            <div v-if="this.res != ''" id="table" class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <th>User Name</th>
+                    <th>Khách hàng</th>
+                    <th>Xem</th>
+                    <th>Sửa</th>
+                    <th>Xóa</th>
+                </tr>
+                <tr v-for="row in res">
+                    <td>{{ row.username }}</td>
+                    <td>{{ row.name }}</td>
+                    <td><button type="button" name="view" class="btn btn-success view" @click="deleteData(row.id)">Xem</button></td>
+                    <td><button type="button" name="edit" class="btn btn-primary edit" @click="fetchData(row.id)">Sửa</button></td>
+                    <td><button type="button" name="delete" class="btn btn-danger delete" @click="deleteData(row.id)">Xóa</button></td>
+                </tr>
+            </table>
+        </div>
         </div>
     </div>
 </div>
@@ -55,8 +74,10 @@
 
 <script>
 
+import axios from 'axios'
 import HeaderComponent from './header.vue'
 import FooTer from '../components/footer.vue'
+import UserPage from '../components/user.vue'
 
 export default {
     name: 'Tracuu',
@@ -64,9 +85,27 @@ export default {
         return {
             overview: true,
             tracuu: false,
+            myfee: 4500,
+            tukhoa: '',
+            res: ''
         }
     },
     methods: {
+        find: function() {
+            if (document.getElementById('tukhoa').value == '') window.alert("Vui lòng nhập từ khóa để tìm kiếm")
+            else{
+                var self = this;
+                axios.post('http://localhost/php/index.php', {
+                    action: 'find',
+                    keyword: this.tukhoa,
+                }).then(function(response){
+                    self.res = response?.data;
+                    console.log(self.res); 
+                }).catch(function (error){
+                    console.log(error);
+                });
+            }
+        },
         logout() 
         {
             localStorage.clear();
@@ -78,7 +117,8 @@ export default {
     },
     components: {
         FooTer,
-        HeaderComponent
+        HeaderComponent,
+        UserPage
     }
 }
 </script>
@@ -96,6 +136,19 @@ export default {
 button {
     width: 100px;
     margin: auto;
+}
+
+#find {
+    width: 50vw;
+    align-self: ;
+}
+
+#search {
+    padding: 60px;
+}
+
+#table {
+    padding: 0px 50px 0px 50px;
 }
 
 </style>
